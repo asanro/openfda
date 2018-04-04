@@ -13,4 +13,4 @@ conn.close()
 repos = json.loads(repos_raw)
 
 repo = repos['results'][0]
-print("The medication's id is ", repo['id'],", its purpose is ", repo['purpose'][0],", and the manufacturer name is ", repo['openfda']['manufacturer_name'])
+print("The medication's id is", repo['id'],", its purpose is", repo['purpose'][0],"; and the manufacturer's name is", repo['openfda']['manufacturer_name'][0])
