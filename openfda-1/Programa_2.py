@@ -15,4 +15,4 @@ conn.close()
 repos = json.loads(repos_raw)
 repo = repos['results']
 for i in range(len(repo)):
-    print("The medication's id is ", repo[i]['id'])
+    print("Medication's id:", repo[i]['id'])
