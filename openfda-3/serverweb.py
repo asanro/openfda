@@ -15,7 +15,7 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
 
         headers = {'User-Agent': 'http-client'}
         conn = http.client.HTTPSConnection("api.fda.gov")
-        conn.request("GET", '/drug/label.json?limit=10', None, headers)
+        conn.request("GET", '/drug/label.json?limit=11', None, headers)
 
         r1 = conn.getresponse()
         if r1.status == 404:
@@ -40,7 +40,7 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         <h1>All of requested medication below </h2>
         <ul>"""
         for i in list:
-            content+="<p>"+i+"</p>"
+            content+="<li>"+i+"</li>"
         content += "</ul></html>"
 
         self.wfile.write(bytes(content, "utf8"))
