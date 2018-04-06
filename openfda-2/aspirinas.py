@@ -18,7 +18,7 @@ repos = json.loads(repos_raw)
 data = repos['results']
 for i in range(len(data)):
     print("Medication's id:", data[i]['id'])
-    try:
+    if data[i]['openfda']:
         print("-Manufacturer's name:", data[i]['openfda']['manufacturer_name'][0])
-    except KeyError:
+    else:
         print("-Manufacturer's name not found")

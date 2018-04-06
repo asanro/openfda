@@ -3,7 +3,7 @@ import socketserver
 import http.client
 import json
 
-PORT = 8080
+PORT = 8001
 
 class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
 
@@ -15,7 +15,7 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
 
         headers = {'User-Agent': 'http-client'}
         conn = http.client.HTTPSConnection("api.fda.gov")
-        conn.request("GET", '/drug/label.json?limit=11', None, headers)
+        conn.request("GET", '/drug/label.json?limit=100', None, headers)
 
         r1 = conn.getresponse()
         if r1.status == 404:
@@ -29,19 +29,21 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         repos = json.loads(repos_raw)
         data = repos['results']
         for i in range(len(data)):
-            try:
+            if data[i]['openfda']:
                 list.append(data[i]['openfda']['generic_name'][0])
-            except KeyError:
+                if len(list)==10:
+                    break
+            else:
                 print("Medication's name not found")
 
         content = """
         <!doctype>
         <html>
         <h1>All of requested medication below </h2>
-        <ul>"""
+        <ol>"""
         for i in list:
             content+="<li>"+i+"</li>"
-        content += "</ul></html>"
+        content += "</ol></html>"
 
         self.wfile.write(bytes(content, "utf8"))
         print("File served!")
