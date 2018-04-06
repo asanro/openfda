@@ -2,7 +2,7 @@ import http.server
 import socketserver
 import http.client
 import json
-
+#explicar todo xd
 PORT = 8001
 
 class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):

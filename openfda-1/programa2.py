@@ -1,6 +1,6 @@
 import http.client
 import json
-
+#explicar todo xd
 headers = {'User-Agent': 'http-client'}
 
 conn = http.client.HTTPSConnection("api.fda.gov")

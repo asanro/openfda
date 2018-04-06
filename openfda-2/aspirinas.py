@@ -1,6 +1,6 @@
 import http.client
 import json
-
+#explicar todo xd
 headers = {'User-Agent': 'http-client'}
 conn = http.client.HTTPSConnection("api.fda.gov")
 conn.request("GET", '/drug/label.json?&search=active_ingredient:"acetylsalicylic"&limit=100', None, headers)
