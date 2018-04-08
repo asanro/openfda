@@ -68,7 +68,6 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
 
 # El servidor comienza a aqui
 # Establecemos como manejador nuestra propia clase
-
 Handler = testHTTPRequestHandler
 httpd = socketserver.TCPServer(("", PORT), Handler) #establecemos el socket del servidor para que espere
 #las conexiones de los clientes
