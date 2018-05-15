@@ -24,9 +24,8 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         conn.close()
 
         repos = json.loads(repos_raw)#Convertimos el objeto json a un lenguaje python, para que podamos trabajar con la información
-        data = repos['results'] #Guardamos en la variable data la información que usaremos mas tarde
 
-        return data
+        return repos
 
     def do_GET(self): #Cada vez que hay una peticion GET por HTTP, empieza a funcionar esta función. El recurso que nos solicitan se encuentra
         # en self.path
@@ -44,19 +43,22 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
             param = self.path.split("?")[1]
             limit = param.split("=")[1] #Parametro introducido por el usuario que hay que pasar al cliente para que obtenga la información de openfda
             data = self.listdata(limit) #Invocamos la funcion listdata para obtener el diccionario del recurso solicitado y lo guardamos en data
-
             #Principio del html de la lista de medicamentos
+
             html = """<!doctype><html><body> 
             <h1>Requested Drug List</h2>
             <ul>"""
 
-            for drug in data: #Iteramos con un bucle por los elementos del diccionario data
-                if drug['openfda']: #Como la información que queremos esta dentro de openfda,
+            try:
+                for drug in data['results']: #Iteramos con un bucle por los elementos del diccionario data
+                    if drug['openfda']: #Como la información que queremos esta dentro de openfda,
                     # nos aseguramos de que esta exista para que no se produzca un KeyError y poder añadir los datos al html anteriormente
-                    html += "<li>" + drug['openfda']['generic_name'][0] + "</li>"
-                else: #Si el nombre del medicamento no está disponible devolverá su id
-                    html += "<li>" + "Medication's name not available" + "</li>" + "- Drug ID: " + drug['id']
-
+                        html += "<li>" + drug['openfda']['generic_name'][0] + "</li>"
+                    else: #Si el nombre del medicamento no está disponible devolverá su id
+                        html += "<li>" + "Medication's name not available" + "</li>" + "- Drug ID: " + drug['id']
+            except KeyError:
+                print('Incorrect limit: must be integer or between 1-100')
+                pass
             #Final del html
             html += "</ul></body></html>"
 
@@ -77,20 +79,22 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
             repos_raw = r1.read().decode("utf-8")
             conn.close()
 
-            repos = json.loads(repos_raw)
-            data = repos['results']
+            data = json.loads(repos_raw)
 
             html = """<!doctype><html><body>
-            <h1>All of the requested drugs by its active ingredient below </h2>"""
+            <h1>All of the requested drugs below </h2>"""
             html += '<body>List of drugs with </body>' + active_ingredient.replace('+', ' ') + '<body> as their active ingredient:</body>'
             html += '<ul>'
 
-            for drug in data:
-                if drug['openfda']:
-                    html += "<li>" + drug['openfda']['generic_name'][0] + "</li>"
-                else:
-                    html += "<li>" + "Medication's name not available" + "</li>" + "- Drug ID: " + drug['id']
-
+            try:
+                for drug in data['results']:
+                    if drug['openfda']:
+                        html += "<li>" + drug['openfda']['generic_name'][0] + "</li>"
+                    else:
+                        html += "<li>" + "Medication's name not available" + "</li>" + "- Drug ID: " + drug['id']
+            except KeyError:
+                html += '<body>No drugs found by the active ingredient: </body>' + active_ingredient
+                pass
             html += "</ul></body></html>"
 
         elif "listCompanies" in self.path:  # Devuelve un html con todas las empresas que están en los fármacos devueltos por OpenFDA
@@ -101,11 +105,16 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
             html = """<!doctype><html><body>
             <h1>Requested Company list </h2>
             <ul>"""
-            for drug in data:
-                if drug['openfda']:
-                    html += "<li>" + drug['openfda']['manufacturer_name'][0] + "</li>"
-                else:
-                    html += "<li>" + "Company not availabe" + "</li>"
+
+            try:
+                for drug in data['results']:
+                    if drug['openfda']:
+                        html += "<li>" + drug['openfda']['manufacturer_name'][0] + "</li>"
+                    else:
+                        html += "<li>" + "Company not availabe" + "</li>"
+            except KeyError:
+                print('Incorrect limit, must be integer and beteween 1-100')
+                pass
 
             html += "</ul></body></html>"
 
@@ -124,19 +133,21 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
             repos_raw = r1.read().decode("utf-8")
             conn.close()
 
-            repos = json.loads(repos_raw)
-            data = repos['results']
+            data = json.loads(repos_raw)
 
             html = """<!doctype><html><body>
-            <h1>All of the requested drugs by its company name below </h2>"""
+            <h1>All of the requested drugs below </h2>"""
             html += '<body>List of drugs with </body>' + company_name.replace('+', ' ') + '<body> as their Company:</body>'
             html += '<ul>'
-            for drug in data:
-                if drug['openfda']:
-                    html += "<li>" + drug['openfda']['generic_name'][0] + "</li>"
-                else:
-                    html += "<li>" + "Medication's name not available" + "</li>" + "-Drug ID: " + drug['id']
-
+            try:
+                for drug in data['results']:
+                    if drug['openfda']:
+                        html += "<li>" + drug['openfda']['generic_name'][0] + "</li>"
+                    else:
+                        html += "<li>" + "Medication's name not available" + "</li>" + "-Drug ID: " + drug['id']
+            except KeyError:
+                html += '<body>No drugs found by the company name: </body>' + company_name
+                pass
             html += "</ul></body></html>"
 
         elif "listWarnings" in self.path: #Devuelve un html con las advertencias de cada medicamento
@@ -148,15 +159,19 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
             <h1>Requested Warning list</h2>
             <ul>"""
 
-            for drug in data:
-                if 'warnings' in drug:
-                    if drug['openfda']:
-                        html += "<li>" + drug['openfda']['generic_name'][0] + "</li>" + '-' + drug['warnings'][0]
+            try:
+                for drug in data['results']:
+                    if 'warnings' in drug:
+                        if drug['openfda']:
+                            html += "<li>" + drug['openfda']['generic_name'][0] + "</li>" + '-' + drug['warnings'][0]
+                        else:
+                            html += "<li>" + "Medication's name not available" + "</li>" + "-Drug ID: " + drug['id']+ '<br>'
+                            html += '-' + drug['warnings'][0]
                     else:
-                        html += "<li>" + "Medication's name not available" + "</li>" + "-Drug ID: " + drug['id']+ '<br>'
-                        html += '-' + drug['warnings'][0]
-                else:
-                    html += "<li>" + "Warnings not avaliable" + "</li>"
+                        html += "<li>" + "Warnings not avaliable" + "</li>"
+            except KeyError:
+                print ('Incorrect limit, must be integer and between 1-100')
+                pass
 
             html += "</ul></body></html>"
 
